@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="hero-panel">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+        <div class="eyebrow mb-2">Shared money, clearly tracked</div>
+        <h1 class="page-title mb-2">Your expense board</h1>
+        <p class="page-subtitle mb-0">Track group spending, payment proof, and approvals in one calm workspace.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'group_create' %}">Create Group</a>
+</div>
+</section>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="metric-card p-3"><div class="metric-label">Groups</div><div class="metric-value">{{ stats.group_count }}</div></div></div>
+    <div class="col-md-3"><div class="metric-card p-3"><div class="metric-label">Pending</div><div class="metric-value">{{ stats.pending_total }}</div></div></div>
+    <div class="col-md-3"><div class="metric-card p-3"><div class="metric-label">To Verify</div><div class="metric-value">{{ stats.verification_count }}</div></div></div>
+    <div class="col-md-3"><div class="metric-card p-3"><div class="metric-label">Unread</div><div class="metric-value">{{ stats.unread_notifications }}</div></div></div>
+</div>
+<div class="board-grid">
+    <div class="board-column blue">
+        <div class="board-column-title"><span>Recent Expenses</span><span class="badge text-bg-secondary">{{ recent_expenses|length }}</span></div>
+        {% for expense in recent_expenses %}
+            <a class="task-card" href="{% url 'expense_detail' expense.pk %}">
+                <strong>{{ expense.title }}</strong>
+                <div class="task-meta">{{ expense.group.name }} - {{ expense.category.name }}</div>
+                <div class="mt-2"><span class="badge text-bg-primary">{{ expense.amount }}</span></div>
+            </a>
+        {% empty %}<div class="empty-state">No expenses yet.</div>{% endfor %}
+    </div>
+    <div class="board-column peach">
+        <div class="board-column-title"><span>Payments Waiting</span><span class="badge text-bg-warning">{{ payments_due|length }}</span></div>
+        {% for payment in payments_due %}
+            <a class="task-card" href="{% url 'upload_proof' payment.pk %}">
+                <strong>{{ payment.expense.title }}</strong>
+                <div class="task-meta">{{ payment.amount }} to {{ payment.receiver.username }}</div>
+                <div class="mt-2"><span class="badge text-bg-warning">{{ payment.get_status_display }}</span></div>
+            </a>
+        {% empty %}<div class="empty-state">No pending payments.</div>{% endfor %}
+    </div>
+    <div class="board-column mint">
+        <div class="board-column-title"><span>Needs Verification</span><span class="badge text-bg-success">{{ payments_to_verify|length }}</span></div>
+        {% for payment in payments_to_verify %}
+            <a class="task-card" href="{% url 'verify_payment' payment.pk %}">
+                <strong>{{ payment.expense.title }}</strong>
+                <div class="task-meta">{{ payment.payer.username }} sent {{ payment.amount }}</div>
+                <div class="mt-2"><span class="badge text-bg-secondary">{{ payment.get_status_display }}</span></div>
+            </a>
+        {% empty %}<div class="empty-state">Nothing to verify.</div>{% endfor %}
+    </div>
+</div>
+{% endblock %}

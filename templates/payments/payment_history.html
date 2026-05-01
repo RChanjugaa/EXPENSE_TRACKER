@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Payments{% endblock %}
+{% block content %}
+<section class="hero-panel">
+    <div class="eyebrow mb-2">Proof and approvals</div>
+    <h1 class="page-title mb-2">Payment History</h1>
+    <p class="page-subtitle mb-0">Filter what is pending, paid, verified, or rejected across your groups.</p>
+</section>
+<form class="row g-2 mb-3" method="get">
+    <div class="col-md-4">
+        <select class="form-select" name="status">
+            <option value="">All statuses</option>
+            {% for value,label in status_choices %}
+                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-4">
+        <select class="form-select" name="group">
+            <option value="">All groups</option>
+            {% for group in groups %}
+                <option value="{{ group.pk }}" {% if request.GET.group == group.pk|stringformat:"s" %}selected{% endif %}>{{ group.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2"><button class="btn btn-outline-primary w-100" type="submit">Filter</button></div>
+</form>
+<div class="table-card"><div class="card-body">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Expense</th><th>Payer</th><th>Receiver</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+            {% for payment in payments %}
+                <tr>
+                    <td>{{ payment.expense.title }}</td>
+                    <td>{{ payment.payer.username }}</td>
+                    <td>{{ payment.receiver.username }}</td>
+                    <td>{{ payment.amount }}</td>
+                    <td><span class="badge text-bg-secondary">{{ payment.get_status_display }}</span></td>
+                    <td>
+                        {% if payment.payer == user and payment.status != "verified" %}
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'upload_proof' payment.pk %}">Upload Proof</a>
+                        {% endif %}
+                        {% if payment.receiver == user and payment.status == "paid" %}
+                            <a class="btn btn-sm btn-primary" href="{% url 'verify_payment' payment.pk %}">Verify</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6"><div class="empty-state">No payments found.</div></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div></div>
+{% endblock %}

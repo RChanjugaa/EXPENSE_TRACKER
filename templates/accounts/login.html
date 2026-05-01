@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+{% load static %}
+<div class="row justify-content-center auth-wrap">
+    <div class="col-lg-9">
+        <div class="auth-card">
+            <div class="row g-0">
+                <div class="col-md-5 auth-brand-panel p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <img class="auth-logo mb-3" src="{% static 'img/expense-tracker-logo.jpeg' %}" alt="Expense Tracker logo">
+                        <h1 class="h3 fw-bold">Welcome back</h1>
+                        <p class="mb-0">Pick up your group expenses, proof uploads, and payment checks exactly where you left them.</p>
+                    </div>
+                </div>
+                <div class="col-md-7 p-4">
+                <h2 class="h4 mb-3">Login</h2>
+                <a class="btn btn-outline-danger w-100 mb-3" href="/accounts/google/login/">Continue with Google</a>
+                <div class="text-center text-muted small mb-3">or use your username and password</div>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-primary w-100" type="submit">Login</button>
+                </form>
+                <p class="mt-3 mb-0">No account? <a href="{% url 'register' %}">Create one</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

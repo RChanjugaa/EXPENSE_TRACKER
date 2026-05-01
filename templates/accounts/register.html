@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+{% load static %}
+<div class="row justify-content-center auth-wrap">
+    <div class="col-lg-9">
+        <div class="auth-card">
+            <div class="row g-0">
+                <div class="col-md-5 auth-brand-panel p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <img class="auth-logo mb-3" src="{% static 'img/expense-tracker-logo.jpeg' %}" alt="Expense Tracker logo">
+                        <h1 class="h3 fw-bold">Start a clean split</h1>
+                        <p class="mb-0">Create groups, invite friends, and keep payment proof organized without awkward follow-ups.</p>
+                    </div>
+                </div>
+                <div class="col-md-7 p-4">
+                <h2 class="h4 mb-3">Create Account</h2>
+                <a class="btn btn-outline-danger w-100 mb-3" href="/accounts/google/login/">Continue with Google</a>
+                <div class="text-center text-muted small mb-3">or create an account below</div>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-primary w-100" type="submit">Register</button>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

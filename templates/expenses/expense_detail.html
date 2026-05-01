@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ expense.title }}{% endblock %}
+{% block content %}
+<section class="hero-panel">
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+    <div>
+        <div class="eyebrow mb-2">Expense card</div>
+        <h1 class="page-title mb-2">{{ expense.title }}</h1>
+        <p class="page-subtitle mb-0">{{ expense.group.name }} - {{ expense.category.name }} - {{ expense.expense_date }}</p>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        {% if can_invite %}
+            <a class="btn btn-outline-primary" href="{% url 'invite_to_expense' expense.pk %}">Invite Member</a>
+        {% endif %}
+        <span class="badge text-bg-primary fs-6">{{ expense.amount }}</span>
+    </div>
+</div>
+</section>
+<div class="board-grid">
+    <div class="board-column blue">
+            <div class="board-column-title"><span>Participants</span><span class="badge text-bg-secondary">{{ expense.participants.all|length }}</span></div>
+            <div>
+                {% for participant in expense.participants.all %}
+                    <div class="task-card d-flex justify-content-between">
+                        <span>{{ participant.user.username }}</span>
+                        <strong>{{ participant.share_amount }}</strong>
+                    </div>
+                {% endfor %}
+            </div>
+    </div>
+    <div class="board-column peach">
+            <div class="board-column-title"><span>Payments</span><span class="badge text-bg-warning">{{ expense.payments.all|length }}</span></div>
+            <div>
+                {% for payment in expense.payments.all %}
+                    <div class="task-card">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ payment.payer.username }} pays {{ payment.receiver.username }}</span>
+                            <span class="badge text-bg-secondary">{{ payment.get_status_display }}</span>
+                        </div>
+                        <div class="text-muted">{{ payment.amount }}</div>
+                    </div>
+                {% empty %}
+                    <div class="empty-state">No payments required.</div>
+                {% endfor %}
+            </div>
+    </div>
+</div>
+{% if expense.description %}
+    <div class="board-card p-3 mt-4">{{ expense.description }}</div>
+{% endif %}
+{% endblock %}

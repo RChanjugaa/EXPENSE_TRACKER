@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Groups{% endblock %}
+{% block content %}
+<section class="hero-panel">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+        <div class="eyebrow mb-2">Boards for every circle</div>
+        <h1 class="page-title mb-2">Groups</h1>
+        <p class="page-subtitle mb-0">Create a board for roommates, trips, events, classmates, or any shared spending crew.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'group_create' %}">New Group</a>
+</div>
+</section>
+<div class="board-grid">
+    {% for group in groups %}
+        <div class="board-card p-3">
+            <h2 class="h5 fw-bold">{{ group.name }}</h2>
+            <p class="soft-text">{{ group.description|default:"No description" }}</p>
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'group_detail' group.pk %}">Open Board</a>
+        </div>
+    {% empty %}
+        <div class="empty-state">You are not in any groups yet.</div>
+    {% endfor %}
+</div>
+{% endblock %}
