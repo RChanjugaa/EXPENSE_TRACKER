@@ -80,4 +80,15 @@ class ExpenseInvitationTests(TestCase):
         self.assertEqual(ExpenseParticipant.objects.get(expense=self.expense, user=self.creator).share_amount, Decimal('45.00'))
         self.assertEqual(Payment.objects.get(expense=self.expense, payer=self.invited).amount, Decimal('45.00'))
 
+    def test_admin_can_add_existing_group_member_to_specific_expense(self):
+        GroupMembership.objects.create(group=self.group, user=self.invited)
+        self.client.login(username='creator', password='pass12345')
+
+        response = self.client.post(reverse('add_expense_participant', args=[self.expense.pk]), {'user': self.invited.pk})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(ExpenseParticipant.objects.get(expense=self.expense, user=self.creator).share_amount, Decimal('45.00'))
+        self.assertEqual(ExpenseParticipant.objects.get(expense=self.expense, user=self.invited).share_amount, Decimal('45.00'))
+        self.assertEqual(Payment.objects.get(expense=self.expense, payer=self.invited).amount, Decimal('45.00'))
+
 # Create your tests here.

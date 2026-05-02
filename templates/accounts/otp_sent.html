@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Login Code Sent{% endblock %}
+{% block content %}
+<div class="row justify-content-center auth-wrap">
+    <div class="col-lg-6">
+        <div class="board-card p-4">
+            <div class="eyebrow text-dark mb-2">Email login</div>
+            <h1 class="h3">Check your login code</h1>
+            <p class="soft-text">If <strong>{{ email }}</strong> is a verified registered account, a 6-digit code has been sent.</p>
+
+            {% if email_setup_warning %}
+                <div class="alert alert-warning">{{ email_setup_warning }}</div>
+            {% endif %}
+
+            {% if dev_code %}
+                <div class="alert alert-info">
+                    Development code: <strong>{{ dev_code }}</strong>
+                </div>
+            {% endif %}
+
+            {% if unknown_email %}
+                <div class="alert alert-secondary">
+                    No verified account was found for this email. Register first or verify your account email.
+                </div>
+                <a class="btn btn-primary" href="{% url 'register' %}">Create Account</a>
+                <a class="btn btn-outline-secondary" href="{% url 'request_login_otp' %}">Try Another Email</a>
+            {% else %}
+                <a class="btn btn-primary" href="{% url 'verify_login_otp' %}">Enter Code</a>
+                <a class="btn btn-outline-secondary" href="{% url 'request_login_otp' %}">Send Another Code</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

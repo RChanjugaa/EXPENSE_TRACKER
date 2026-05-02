@@ -15,12 +15,11 @@
                 </div>
                 <div class="col-md-7 p-4">
                 <h2 class="h4 mb-3">Create Account</h2>
-                <a class="btn btn-outline-danger w-100 mb-3" href="/accounts/google/login/">Continue with Google</a>
-                <div class="text-center text-muted small mb-3">or create an account below</div>
+                <p class="soft-text">We will email you a 6-digit verification code before the account can log in.</p>
                 <form method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button class="btn btn-primary w-100" type="submit">Register</button>
+                    <button class="btn btn-primary w-100" type="submit">Register and Send Code</button>
                 </form>
                 </div>
             </div>

@@ -22,3 +22,7 @@ class AddMemberForm(forms.Form):
         if group:
             users = users.exclude(expense_memberships__group=group)
         self.fields['user'].queryset = users
+
+
+class GroupInvitationForm(forms.Form):
+    email = forms.EmailField(help_text='The invitation link will be sent by email.')

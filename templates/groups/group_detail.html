@@ -12,6 +12,7 @@
         <a class="btn btn-primary" href="{% url 'expense_create' group.pk %}">Add Expense</a>
         {% if is_admin %}
             <a class="btn btn-outline-primary" href="{% url 'add_member' group.pk %}">Add Member</a>
+            <a class="btn btn-outline-primary" href="{% url 'invite_member' group.pk %}">Email Invite</a>
             <a class="btn btn-outline-secondary" href="{% url 'group_edit' group.pk %}">Edit</a>
         {% endif %}
     </div>

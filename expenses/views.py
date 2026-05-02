@@ -15,7 +15,7 @@ from notifications.models import Notification
 from notifications.utils import create_notification
 from payments.models import Payment
 
-from .forms import ExpenseForm, ExpenseInvitationForm
+from .forms import AddExpenseParticipantForm, ExpenseForm, ExpenseInvitationForm
 from .models import Expense, ExpenseCategory, ExpenseInvitation, ExpenseParticipant
 
 
@@ -46,6 +46,10 @@ def rebuild_equal_split(expense, users):
         if user != expense.paid_by:
             Payment.objects.create(expense=expense, payer=user, receiver=expense.paid_by, amount=share)
         create_notification(user, f'Expense "{expense.title}" was updated in {expense.group.name}.', Notification.Type.EXPENSE, expense)
+
+
+def can_manage_expense_members(expense, user):
+    return expense.created_by == user or expense.group.is_admin(user)
 
 
 @login_required
@@ -82,7 +86,7 @@ def expense_detail(request, pk):
     )
     return render(request, 'expenses/expense_detail.html', {
         'expense': expense,
-        'can_invite': expense.created_by == request.user and can_recalculate_expense(expense),
+        'can_invite': can_manage_expense_members(expense, request.user) and can_recalculate_expense(expense),
     })
 
 
@@ -93,8 +97,8 @@ def invite_to_expense(request, pk):
         pk=pk,
         group__memberships__user=request.user,
     )
-    if expense.created_by != request.user:
-        messages.error(request, 'Only the expense creator can invite members to this expense.')
+    if not can_manage_expense_members(expense, request.user):
+        messages.error(request, 'Only the expense creator or group admin can invite members to this expense.')
         return redirect('expense_detail', pk=expense.pk)
     if not can_recalculate_expense(expense):
         messages.error(request, 'Members cannot be added after a payment has been marked paid, verified, or rejected.')
@@ -118,7 +122,7 @@ def invite_to_expense(request, pk):
                 f'{request.user.username} invited you to join the expense "{expense.title}" '
                 f'in the group "{expense.group.name}".\n\n'
                 f'Open this link to accept the invitation:\n{accept_url}\n\n'
-                'You can register or log in with Google before accepting.'
+                'If you do not have an account yet, register with this email and verify it before accepting.'
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
@@ -127,6 +131,32 @@ def invite_to_expense(request, pk):
         messages.success(request, f'Invitation sent to {email}.')
         return redirect('expense_detail', pk=expense.pk)
     return render(request, 'expenses/invite_to_expense.html', {'expense': expense, 'form': form})
+
+
+@login_required
+def add_expense_participant(request, pk):
+    expense = get_object_or_404(
+        Expense.objects.select_related('group', 'created_by'),
+        pk=pk,
+        group__memberships__user=request.user,
+    )
+    if not can_manage_expense_members(expense, request.user):
+        messages.error(request, 'Only the expense creator or group admin can add members to this expense.')
+        return redirect('expense_detail', pk=expense.pk)
+    if not can_recalculate_expense(expense):
+        messages.error(request, 'Members cannot be added after a payment has been marked paid, verified, or rejected.')
+        return redirect('expense_detail', pk=expense.pk)
+
+    form = AddExpenseParticipantForm(request.POST or None, expense=expense)
+    if request.method == 'POST' and form.is_valid():
+        user = form.cleaned_data['user']
+        participant_users = [participant.user for participant in expense.participants.select_related('user')]
+        participant_users.append(user)
+        with transaction.atomic():
+            rebuild_equal_split(expense, participant_users)
+        messages.success(request, f'{user.username} was added to this expense and shares were recalculated.')
+        return redirect('expense_detail', pk=expense.pk)
+    return render(request, 'expenses/add_expense_participant.html', {'expense': expense, 'form': form})
 
 
 @login_required
@@ -139,6 +169,9 @@ def accept_expense_invitation(request, token):
     expense = invitation.expense
     if not request.user.email or invitation.email.lower() != request.user.email.lower():
         messages.error(request, 'Log in with the same email address that received this invitation.')
+        return redirect('dashboard')
+    if not request.user.is_active:
+        messages.error(request, 'Verify your email before accepting invitations.')
         return redirect('dashboard')
     if not can_recalculate_expense(expense):
         messages.error(request, 'This expense can no longer accept new members because payment activity has already started.')

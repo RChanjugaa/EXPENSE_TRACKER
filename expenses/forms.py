@@ -32,3 +32,19 @@ class ExpenseForm(forms.ModelForm):
 
 class ExpenseInvitationForm(forms.Form):
     email = forms.EmailField(help_text='The invitation link will be sent by email.')
+
+
+class AddExpenseParticipantForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=get_user_model().objects.none(), label='Group member')
+
+    def __init__(self, *args, expense=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not expense:
+            return
+        current_participants = expense.participants.values_list('user_id', flat=True)
+        self.fields['user'].queryset = (
+            get_user_model().objects
+            .filter(expense_memberships__group=expense.group)
+            .exclude(pk__in=current_participants)
+            .order_by('username')
+        )

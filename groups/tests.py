@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import ExpenseGroup, GroupMembership
+from .models import ExpenseGroup, GroupInvitation, GroupMembership
 
 
 class GroupAccessTests(TestCase):
@@ -20,5 +21,31 @@ class GroupAccessTests(TestCase):
 
         self.assertContains(response, 'Own')
         self.assertNotContains(response, 'Other')
+
+
+class GroupInvitationTests(TestCase):
+    def test_group_admin_can_email_invitation_and_user_can_accept(self):
+        User = get_user_model()
+        admin = User.objects.create_user(username='admin', email='admin@example.com', password='pass12345')
+        invited = User.objects.create_user(username='invited', email='invited@example.com', password='pass12345')
+        group = ExpenseGroup.objects.create(name='Project Trip', created_by=admin)
+        GroupMembership.objects.create(group=group, user=admin, role=GroupMembership.Role.ADMIN)
+
+        self.client.login(username='admin', password='pass12345')
+        response = self.client.post(reverse('invite_member', args=[group.pk]), {'email': 'invited@example.com'})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Project Trip', mail.outbox[0].body)
+
+        invitation = GroupInvitation.objects.get()
+        self.client.logout()
+        self.client.login(username='invited', password='pass12345')
+        response = self.client.get(reverse('accept_group_invitation', args=[invitation.token]))
+
+        self.assertEqual(response.status_code, 302)
+        invitation.refresh_from_db()
+        self.assertEqual(invitation.status, GroupInvitation.Status.ACCEPTED)
+        self.assertTrue(GroupMembership.objects.filter(group=group, user=invited).exists())
 
 # Create your tests here.

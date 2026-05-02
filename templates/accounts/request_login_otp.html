@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Email Login Code{% endblock %}
+{% block content %}
+<div class="row justify-content-center auth-wrap">
+    <div class="col-lg-6">
+        <div class="board-card p-4">
+            <h1 class="h4">Email me a login code</h1>
+            <p class="soft-text">Enter your verified email address. We will send a 6-digit code you can use to log in.</p>
+            {% if email_setup_warning %}
+                <div class="alert alert-warning">{{ email_setup_warning }}</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary" type="submit">Send Code</button>
+                <a class="btn btn-outline-secondary" href="{% url 'login' %}">Back</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

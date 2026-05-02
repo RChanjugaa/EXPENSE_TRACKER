@@ -13,44 +13,29 @@ python -m venv .venv
 
 Open http://127.0.0.1:8000/register/ to create your first account.
 
+On this machine, you can also run:
+
+```powershell
+.\run_app.ps1
+```
+
 ## Test
 
 ```powershell
 .\.venv\Scripts\python.exe manage.py test
 ```
 
-## Google Login Setup
+## Email Verification and Invitations
 
-This project uses `django-allauth` for Google registration and login.
+Registration, passwordless email login, group invitations, expense invitations, and settlement reminders use Django email settings.
 
-1. Create OAuth credentials in Google Cloud Console.
-2. Add this local redirect URI:
+The authentication flow is:
 
-```text
-http://127.0.0.1:8000/accounts/google/login/callback/
-```
+1. Register with username, email, and password.
+2. Enter the 6-digit verification code sent to the registered email.
+3. Log in with email/username and password, or request a 6-digit email login code.
 
-3. Create a Django admin user:
-
-```powershell
-.\.venv\Scripts\python.exe manage.py createsuperuser
-```
-
-4. Open `/admin/`, go to **Social applications**, and add:
-   - Provider: Google
-   - Client ID: your Google OAuth client ID
-   - Secret key: your Google OAuth client secret
-   - Sites: move `example.com` or your local site into the chosen sites box
-
-For AWS, add the production callback URL too, for example:
-
-```text
-https://your-domain.com/accounts/google/login/callback/
-```
-
-## Gmail Invitation Setup
-
-Invitations use Django email settings. Local development defaults to console email, so invitation links print in the server output.
+Local development can use console email, where codes print in the server terminal. For a real inbox, configure SMTP.
 
 To send real Gmail messages, create a Gmail app password and set these in `.env`:
 
@@ -65,3 +50,16 @@ DEFAULT_FROM_EMAIL=your-gmail-address@gmail.com
 ```
 
 Never commit `.env` or real credentials.
+
+To verify email delivery from your own PowerShell terminal:
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test_email your-gmail-address@gmail.com
+```
+
+## AI Agents
+
+The `/agents/` page includes:
+
+- Expense Assistant: parses natural language like `I paid 4500 for dinner with amal` and can create the expense.
+- Settlement Agent: lists pending payments for a group and can send email reminders plus in-app notifications.

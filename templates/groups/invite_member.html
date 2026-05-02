@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Invite Group Member{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="board-card p-4">
+            <h1 class="h4">Invite Member to {{ group.name }}</h1>
+            <p class="soft-text">Send a group invitation by email. The recipient must register with this email and verify it before accepting.</p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary" type="submit">Send Email Invite</button>
+                <a class="btn btn-outline-secondary" href="{% url 'group_detail' group.pk %}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
