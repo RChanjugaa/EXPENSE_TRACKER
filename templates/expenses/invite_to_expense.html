@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Invite Member{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="board-card p-4">
+            <h1 class="h4">Invite Member</h1>
+            <p class="soft-text">Send an email invitation for {{ expense.title }}. The invited person must register with this email and verify it before accepting.</p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary" type="submit">Send Invitation</button>
+                <a class="btn btn-outline-secondary" href="{% url 'expense_detail' expense.pk %}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

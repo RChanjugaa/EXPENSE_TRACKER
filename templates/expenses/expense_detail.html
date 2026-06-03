@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load expense_filters %}
+{% block title %}{{ expense.title }} — Expense Tracker{% endblock %}
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'group_list' %}">Groups</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'group_detail' expense.group.pk %}">{{ expense.group.name }}</a></li>
+        <li class="breadcrumb-item active">{{ expense.title }}</li>
+    </ol>
+</nav>
+
+<section class="hero-panel">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div>
+            <div class="eyebrow mb-2"><i class="bi bi-receipt me-1"></i> Expense card</div>
+            <h1 class="page-title mb-2">{{ expense.title }}</h1>
+            <p class="page-subtitle mb-0">
+                {{ expense.group.name }} &nbsp;·&nbsp; {{ expense.category.name }} &nbsp;·&nbsp; {{ expense.expense_date }}
+            </p>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            {% if can_invite %}
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'add_expense_participant' expense.pk %}">
+                    <i class="bi bi-person-plus me-1"></i> Add Member
+                </a>
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'invite_to_expense' expense.pk %}">
+                    <i class="bi bi-envelope me-1"></i> Invite
+                </a>
+            {% endif %}
+            <div class="metric-card px-3 py-2 text-center">
+                <div class="metric-label">Total</div>
+                <div class="metric-value">{{ expense.amount|currency }}</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if expense.description %}
+    <div class="board-card p-3 mb-4 soft-text">
+        <i class="bi bi-chat-left-text me-2"></i>{{ expense.description }}
+    </div>
+{% endif %}
+
+<div class="board-grid mb-4">
+    <!-- Participants -->
+    <div class="board-column blue">
+        <div class="board-column-title">
+            <span><i class="bi bi-people me-1"></i> Participants</span>
+            <span class="badge text-bg-secondary">{{ expense.participants.count }}</span>
+        </div>
+        {% for participant in expense.participants.all %}
+            <div class="task-card d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-person-circle me-1 soft-text"></i>
+                    <strong>{{ participant.user.username }}</strong>
+                    {% if participant.user == expense.paid_by %}
+                        <span class="badge status-verified ms-1">Paid</span>
+                    {% endif %}
+                </div>
+                <span class="fw-bold">{{ participant.share_amount|currency }}</span>
+            </div>
+        {% empty %}
+            <div class="empty-state">No participants yet.</div>
+        {% endfor %}
+    </div>
+
+    <!-- Payments -->
+    <div class="board-column peach">
+        <div class="board-column-title">
+            <span><i class="bi bi-credit-card me-1"></i> Payments</span>
+            <span class="badge status-pending">{{ expense.payments.count }}</span>
+        </div>
+        {% for payment in expense.payments.all %}
+            <div class="task-card">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="soft-text small">
+                        <strong>{{ payment.payer.username }}</strong> → {{ payment.receiver.username }}
+                    </span>
+                    <span class="badge {{ payment.status|status_badge }}">{{ payment.get_status_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">{{ payment.amount|currency }}</span>
+                    {% if payment.payer == request.user and payment.status != 'verified' %}
+                        <a class="btn btn-sm btn-outline-primary" href="{% url 'upload_proof' payment.pk %}">
+                            <i class="bi bi-upload me-1"></i>Upload proof
+                        </a>
+                    {% endif %}
+                    {% if payment.receiver == request.user and payment.status == 'paid' %}
+                        <a class="btn btn-sm btn-primary" href="{% url 'verify_payment' payment.pk %}">
+                            <i class="bi bi-shield-check me-1"></i>Verify
+                        </a>
+                    {% endif %}
+                </div>
+                {% if payment.rejection_reason %}
+                    <div class="alert alert-danger py-1 px-2 mt-2 mb-0 small">
+                        <i class="bi bi-exclamation-circle me-1"></i>{{ payment.rejection_reason }}
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="empty-state">No payments required.</div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

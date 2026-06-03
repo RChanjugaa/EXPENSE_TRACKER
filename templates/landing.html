@@ -1,0 +1,227 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Expense Tracker — Shared money, clearly tracked</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="{% static 'css/design-system.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar navbar-expand-lg app-navbar sticky-top">
+    <div class="container">
+        <a class="navbar-brand brand-lockup" href="{% url 'landing' %}">
+            <img class="brand-mark" src="{% static 'img/expense-tracker-logo.jpeg' %}" alt="Expense Tracker logo">
+            <span>Expense Tracker</span>
+        </a>
+        <div class="ms-auto d-flex gap-2">
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'login' %}">Login</a>
+            <a class="btn btn-primary btn-sm" href="{% url 'register' %}">Get Started</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="landing-hero">
+    <div class="container">
+        <div class="landing-hero-inner">
+            <div class="landing-hero-text">
+                <div class="eyebrow mb-3" style="color:rgba(255,249,239,0.7)">
+                    <i class="bi bi-lightning-charge-fill me-1"></i> Free · No credit card needed
+                </div>
+                <h1 class="landing-title">Shared money,<br>clearly tracked.</h1>
+                <p class="landing-subtitle">Stop chasing payments. Expense Tracker lets your group record costs, split bills instantly, upload proof, and confirm payments — all in one calm workspace.</p>
+                <div class="d-flex flex-wrap gap-3 mt-4">
+                    <a href="{% url 'register' %}" class="btn btn-landing-primary btn-lg">
+                        <i class="bi bi-person-plus me-2"></i>Create your account
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-landing-outline btn-lg">Sign in</a>
+                </div>
+            </div>
+            <div class="landing-hero-card">
+                <div class="lcard-header">
+                    <span class="lcard-dot red"></span>
+                    <span class="lcard-dot amber"></span>
+                    <span class="lcard-dot green"></span>
+                    <span class="lcard-title ms-2">Dashboard</span>
+                </div>
+                <div class="lcard-body">
+                    <div class="lcard-metric-row">
+                        <div class="lcard-metric">
+                            <div class="lcard-metric-label">Groups</div>
+                            <div class="lcard-metric-value">4</div>
+                        </div>
+                        <div class="lcard-metric">
+                            <div class="lcard-metric-label">Pending</div>
+                            <div class="lcard-metric-value" style="color:#e67e22">R 840</div>
+                        </div>
+                        <div class="lcard-metric">
+                            <div class="lcard-metric-label">Verified</div>
+                            <div class="lcard-metric-value" style="color:#27ae60">R 3 200</div>
+                        </div>
+                    </div>
+                    <div class="lcard-section-title">Recent expenses</div>
+                    <div class="lcard-row">
+                        <span><i class="bi bi-cup-hot-fill me-1" style="color:#e67e22"></i> Team lunch</span>
+                        <span class="lcard-amount">R 1 200</span>
+                    </div>
+                    <div class="lcard-row">
+                        <span><i class="bi bi-house-fill me-1" style="color:#2980b9"></i> Rent — April</span>
+                        <span class="lcard-amount">R 8 500</span>
+                    </div>
+                    <div class="lcard-row">
+                        <span><i class="bi bi-airplane-fill me-1" style="color:#8e44ad"></i> Weekend trip</span>
+                        <span class="lcard-amount">R 3 600</span>
+                    </div>
+                    <div class="lcard-section-title mt-3">Payment status</div>
+                    <div class="lcard-row">
+                        <span>Amal → Sara</span>
+                        <span class="lcard-badge verified">Verified</span>
+                    </div>
+                    <div class="lcard-row">
+                        <span>You → Amal</span>
+                        <span class="lcard-badge pending">Pending</span>
+                    </div>
+                    <div class="lcard-row">
+                        <span>Sara → You</span>
+                        <span class="lcard-badge paid">Paid</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="landing-features">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="landing-section-title">Everything your group needs</h2>
+            <p class="landing-section-sub">One place for expenses, splits, proof, and confirmations.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:var(--teal-soft)">
+                        <i class="bi bi-people-fill" style="color:var(--teal)"></i>
+                    </div>
+                    <h3 class="feature-title">Expense groups</h3>
+                    <p class="feature-body">Create boards for roommates, trips, classmates, or any crew. Invite members by email — they join instantly.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:var(--sage)">
+                        <i class="bi bi-calculator-fill" style="color:#3d6b2e"></i>
+                    </div>
+                    <h3 class="feature-title">Automatic splits</h3>
+                    <p class="feature-body">Add an expense, pick participants, and shares are calculated instantly. No spreadsheets, no arguments.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:var(--sand)">
+                        <i class="bi bi-shield-check-fill" style="color:#9b6000"></i>
+                    </div>
+                    <h3 class="feature-title">Proof &amp; verification</h3>
+                    <p class="feature-body">Upload your payment receipt. The receiver reviews and confirms — keeping everyone honest and transparent.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:var(--blush)">
+                        <i class="bi bi-bell-fill" style="color:#9b2337"></i>
+                    </div>
+                    <h3 class="feature-title">Real-time notifications</h3>
+                    <p class="feature-body">Get notified the moment an expense is added, a payment is uploaded, or a verification is completed.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:var(--butter)">
+                        <i class="bi bi-bar-chart-fill" style="color:#7a5900"></i>
+                    </div>
+                    <h3 class="feature-title">Monthly reports</h3>
+                    <p class="feature-body">See your spending by category and group every month. Understand where your money is going at a glance.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background:var(--teal-soft)">
+                        <i class="bi bi-stars" style="color:var(--teal)"></i>
+                    </div>
+                    <h3 class="feature-title">AI expense assistant</h3>
+                    <p class="feature-body">Describe an expense in plain English — "I paid 4500 for dinner with Amal and Sara" — and the AI logs it for you.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="landing-steps">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="landing-section-title">How it works</h2>
+            <p class="landing-section-sub">Three simple steps to a stress-free shared wallet.</p>
+        </div>
+        <div class="steps-row">
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <h4 class="step-title">Create a group</h4>
+                <p class="step-body">Register and invite your friends, roommates, or teammates to a shared expense board.</p>
+            </div>
+            <div class="step-arrow"><i class="bi bi-arrow-right"></i></div>
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <h4 class="step-title">Add expenses</h4>
+                <p class="step-body">Record what was spent, who paid, and pick participants. Shares are split automatically.</p>
+            </div>
+            <div class="step-arrow"><i class="bi bi-arrow-right"></i></div>
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <h4 class="step-title">Settle &amp; verify</h4>
+                <p class="step-body">Pay outside the app, upload proof, and let the receiver confirm. Done — no disputes.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="landing-cta">
+    <div class="container text-center">
+        <h2 class="landing-cta-title">Ready to stop chasing payments?</h2>
+        <p class="landing-cta-sub">Join for free. No credit card, no limits on groups or expenses.</p>
+        <a href="{% url 'register' %}" class="btn btn-landing-primary btn-lg mt-3">
+            <i class="bi bi-rocket-takeoff me-2"></i>Get started free
+        </a>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="app-footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <img src="{% static 'img/expense-tracker-logo.jpeg' %}" alt="logo" class="footer-logo">
+                <span>Expense Tracker</span>
+            </div>
+            <div class="footer-links">
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            </div>
+            <div class="footer-copy">&copy; 2026 Expense Tracker. Shared money, clearly tracked.</div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

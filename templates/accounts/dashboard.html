@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load expense_filters %}
+{% block title %}Dashboard — Expense Tracker{% endblock %}
+{% block content %}
+
+<section class="hero-panel">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <div class="eyebrow mb-2"><i class="bi bi-grid me-1"></i> Your workspace</div>
+            <h1 class="page-title mb-2">Good to see you, {{ user.first_name|default:user.username }}.</h1>
+            <p class="page-subtitle mb-0">Track group spending, upload payment proof, and approve settlements — all in one place.</p>
+        </div>
+        <a class="btn btn-primary" href="{% url 'group_create' %}">
+            <i class="bi bi-plus-lg me-1"></i> New Group
+        </a>
+    </div>
+</section>
+
+<!-- Metric cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="metric-card p-3">
+            <div class="metric-label"><i class="bi bi-people me-1"></i> Groups</div>
+            <div class="metric-value">{{ stats.group_count }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-card p-3">
+            <div class="metric-label"><i class="bi bi-hourglass-split me-1"></i> Pending</div>
+            <div class="metric-value" style="color:var(--teal-deep)">{{ stats.pending_total|currency }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-card p-3">
+            <div class="metric-label"><i class="bi bi-eye me-1"></i> To Verify</div>
+            <div class="metric-value">{{ stats.verification_count }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="metric-card p-3">
+            <div class="metric-label"><i class="bi bi-bell me-1"></i> Unread</div>
+            <div class="metric-value">{{ stats.unread_notifications }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Board columns -->
+<div class="board-grid mb-4">
+    <div class="board-column blue">
+        <div class="board-column-title">
+            <span><i class="bi bi-receipt me-1"></i> Recent Expenses</span>
+            <span class="badge text-bg-secondary">{{ recent_expenses|length }}</span>
+        </div>
+        {% for expense in recent_expenses %}
+            <a class="task-card" href="{% url 'expense_detail' expense.pk %}">
+                <strong>{{ expense.title }}</strong>
+                <div class="task-meta">{{ expense.group.name }} · {{ expense.category.name }}</div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="badge text-bg-secondary">{{ expense.amount|currency }}</span>
+                    <small class="task-meta">{{ expense.expense_date }}</small>
+                </div>
+            </a>
+        {% empty %}
+            <div class="empty-state">No expenses yet. <a href="{% url 'group_list' %}">Start a group.</a></div>
+        {% endfor %}
+    </div>
+
+    <div class="board-column peach">
+        <div class="board-column-title">
+            <span><i class="bi bi-clock-history me-1"></i> Payments Waiting</span>
+            <span class="badge status-pending">{{ payments_due|length }}</span>
+        </div>
+        {% for payment in payments_due %}
+            <a class="task-card" href="{% url 'upload_proof' payment.pk %}">
+                <strong>{{ payment.expense.title }}</strong>
+                <div class="task-meta">To {{ payment.receiver.username }}</div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="badge {{ payment.status|status_badge }}">{{ payment.get_status_display }}</span>
+                    <span class="fw-bold">{{ payment.amount|currency }}</span>
+                </div>
+            </a>
+        {% empty %}
+            <div class="empty-state">You're all caught up!</div>
+        {% endfor %}
+    </div>
+
+    <div class="board-column mint">
+        <div class="board-column-title">
+            <span><i class="bi bi-shield-check me-1"></i> Needs Verification</span>
+            <span class="badge status-verified">{{ payments_to_verify|length }}</span>
+        </div>
+        {% for payment in payments_to_verify %}
+            <a class="task-card" href="{% url 'verify_payment' payment.pk %}">
+                <strong>{{ payment.expense.title }}</strong>
+                <div class="task-meta">{{ payment.payer.username }} sent</div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="badge status-paid">{{ payment.get_status_display }}</span>
+                    <span class="fw-bold">{{ payment.amount|currency }}</span>
+                </div>
+            </a>
+        {% empty %}
+            <div class="empty-state">Nothing to verify.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Category breakdown -->
+{% if categories %}
+<div class="table-card mb-4">
+    <div class="card-body">
+        <h2 class="h5 mb-3"><i class="bi bi-bar-chart me-2"></i>Spending by category</h2>
+        {% for cat in categories %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="fw-bold">{{ cat.category__name }}</span>
+                    <span class="soft-text">{{ cat.total|currency }} &nbsp;·&nbsp; {{ cat.count }} expense{{ cat.count|pluralize }}</span>
+                </div>
+                <div class="cat-bar-track">
+                    <div class="cat-bar-fill" style="width:{{ cat.pct }}%"></div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

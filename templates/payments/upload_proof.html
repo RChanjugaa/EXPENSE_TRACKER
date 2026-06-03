@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load expense_filters %}
+{% block title %}Upload Proof — Expense Tracker{% endblock %}
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'payment_history' %}">Payments</a></li>
+        <li class="breadcrumb-item active">Upload Proof</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="board-card p-5">
+            <div class="text-center mb-4">
+                <div class="feature-icon mx-auto mb-3" style="background:var(--teal-soft)">
+                    <i class="bi bi-upload" style="color:var(--teal);font-size:1.4rem"></i>
+                </div>
+                <h1 class="h4 fw-bold">Upload Payment Proof</h1>
+                <p class="soft-text mb-0">
+                    <strong>{{ payment.expense.title }}</strong> &nbsp;·&nbsp;
+                    {{ payment.amount|currency }} to <strong>{{ payment.receiver.username }}</strong>
+                </p>
+            </div>
+
+            <div class="alert alert-info py-2 mb-4">
+                <i class="bi bi-info-circle me-2"></i>
+                Accepted formats: JPG, PNG, PDF &nbsp;·&nbsp; Max size: 5 MB
+            </div>
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger py-2">{{ error }}</div>
+                {% endfor %}
+                <div class="mb-4">
+                    <label class="form-label">{{ form.proof_file.label }}</label>
+                    {{ form.proof_file }}
+                    {% for e in form.proof_file.errors %}
+                        <div class="form-text text-danger">{{ e }}</div>
+                    {% endfor %}
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-check2-circle me-2"></i>Mark as Paid &amp; Upload
+                    </button>
+                    <a class="btn btn-outline-secondary" href="{% url 'payment_history' %}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

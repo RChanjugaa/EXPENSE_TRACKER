@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load expense_filters %}
+{% block title %}AI Agents — Expense Tracker{% endblock %}
+{% block content %}
+
+<section class="hero-panel">
+    <div class="eyebrow mb-2"><i class="bi bi-stars me-1"></i> Agentic AI workspace</div>
+    <h1 class="page-title mb-2">AI Expense Assistant</h1>
+    <p class="page-subtitle mb-0">Draft expenses from plain English, calculate pending settlements, and send reminder emails automatically.</p>
+</section>
+
+<div class="board-grid">
+
+    <!-- Expense Assistant -->
+    <div class="board-column blue">
+        <div class="board-column-title">
+            <span><i class="bi bi-chat-left-text me-1"></i> Expense Assistant</span>
+            <span class="badge text-bg-secondary">Draft</span>
+        </div>
+        <p class="soft-text small mb-3">Describe the expense in plain English and the AI will parse it for you.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="agent" value="expense">
+            <div class="mb-3">
+                <label class="form-label">{{ expense_form.group.label }}</label>
+                {{ expense_form.group }}
+            </div>
+            <div class="mb-3">
+                <label class="form-label">{{ expense_form.prompt.label }}</label>
+                {{ expense_form.prompt }}
+                <div class="form-text">{{ expense_form.prompt.help_text }}</div>
+            </div>
+            <div class="mb-3 form-check">
+                {{ expense_form.create_expense }}
+                <label class="form-check-label" for="{{ expense_form.create_expense.id_for_label }}">
+                    {{ expense_form.create_expense.label }}
+                </label>
+            </div>
+            <button class="btn btn-primary w-100" type="submit">
+                <i class="bi bi-stars me-2"></i>Run Expense Assistant
+            </button>
+        </form>
+
+        {% if expense_draft %}
+            <div class="task-card mt-3">
+                <div class="board-column-title mb-2"><span>Draft result</span></div>
+                <div class="mb-1"><strong>{{ expense_draft.title }}</strong></div>
+                <div class="task-meta mb-1">Amount: <strong>{{ expense_draft.amount|default:"Not detected"|currency }}</strong></div>
+                <div class="task-meta mb-1">Category: {{ expense_draft.category.name }}</div>
+                <div class="task-meta mb-2">Confidence: <span class="badge text-bg-secondary">{{ expense_draft.confidence }}</span></div>
+                <div class="d-flex flex-wrap gap-1">
+                    {% for participant in expense_draft.participants %}
+                        <span class="badge status-paid">
+                            <i class="bi bi-person me-1"></i>{{ participant.username }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Settlement Agent -->
+    <div class="board-column peach">
+        <div class="board-column-title">
+            <span><i class="bi bi-send me-1"></i> Settlement Agent</span>
+            <span class="badge status-pending">Reminders</span>
+        </div>
+        <p class="soft-text small mb-3">View pending settlements for a group and optionally email reminders to everyone who owes.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="agent" value="settlement">
+            <div class="mb-3">
+                <label class="form-label">{{ settlement_form.group.label }}</label>
+                {{ settlement_form.group }}
+            </div>
+            <div class="mb-3 form-check">
+                {{ settlement_form.send_reminders }}
+                <label class="form-check-label" for="{{ settlement_form.send_reminders.id_for_label }}">
+                    {{ settlement_form.send_reminders.label }}
+                </label>
+            </div>
+            <button class="btn btn-primary w-100" type="submit">
+                <i class="bi bi-calculator me-2"></i>Run Settlement Agent
+            </button>
+        </form>
+
+        {% if settlements is not None %}
+            <div class="mt-3">
+                {% for payment in settlements %}
+                    <div class="task-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><strong>{{ payment.payer.username }}</strong> → {{ payment.receiver.username }}</span>
+                            <span class="badge {{ payment.status|status_badge }}">{{ payment.get_status_display }}</span>
+                        </div>
+                        <div class="task-meta mt-1">{{ payment.amount|currency }} for <em>{{ payment.expense.title }}</em></div>
+                    </div>
+                {% empty %}
+                    <div class="empty-state mt-2">
+                        <i class="bi bi-check-circle" style="font-size:1.4rem;display:block;margin-bottom:6px;opacity:.5"></i>
+                        No pending settlements for this group.
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load expense_filters %}
+{% block title %}Monthly Report — Expense Tracker{% endblock %}
+{% block content %}
+
+<section class="hero-panel">
+    <div class="eyebrow mb-2"><i class="bi bi-calendar3 me-1"></i> Monthly visibility</div>
+    <h1 class="page-title mb-2">{{ month_name }} {{ year }} Report</h1>
+    <p class="page-subtitle mb-0">Understand your spending by category and group for this month.</p>
+</section>
+
+<!-- Month picker -->
+<form class="row g-2 mb-4 align-items-end" method="get">
+    <div class="col-auto">
+        <label class="form-label">Year</label>
+        <input class="form-control" type="number" name="year" value="{{ year }}" min="2020" max="2030" style="width:100px">
+    </div>
+    <div class="col-auto">
+        <label class="form-label">Month</label>
+        <select class="form-select" name="month" style="width:140px">
+            {% for num, name in months %}
+                <option value="{{ num }}" {% if num == month %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-primary" type="submit">
+            <i class="bi bi-arrow-right me-1"></i> View
+        </button>
+    </div>
+</form>
+
+<!-- Summary metrics -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+        <div class="metric-card p-3">
+            <div class="metric-label"><i class="bi bi-wallet2 me-1"></i> Total Spent</div>
+            <div class="metric-value">{{ total|currency }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="metric-card p-3">
+            <div class="metric-label"><i class="bi bi-hourglass-split me-1"></i> Pending</div>
+            <div class="metric-value">{{ pending_total|currency }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="metric-card p-3">
+            <div class="metric-label"><i class="bi bi-shield-check me-1"></i> Verified</div>
+            <div class="metric-value">{{ verified_total|currency }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- By Category -->
+    <div class="col-md-6">
+        <div class="board-column mint">
+            <h2 class="h5 mb-3"><i class="bi bi-tag me-2"></i>By Category</h2>
+            {% for row in by_category %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-bold">{{ row.category__name }}</span>
+                        <span class="soft-text">{{ row.total|currency }}</span>
+                    </div>
+                    <div class="cat-bar-track">
+                        <div class="cat-bar-fill" style="width:{{ row.pct }}%"></div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">No expense data for this month.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- By Group -->
+    <div class="col-md-6">
+        <div class="board-column blue">
+            <h2 class="h5 mb-3"><i class="bi bi-people me-2"></i>By Group</h2>
+            {% for row in by_group %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-bold">{{ row.group__name }}</span>
+                        <span class="soft-text">{{ row.total|currency }}</span>
+                    </div>
+                    <div class="cat-bar-track">
+                        <div class="cat-bar-fill" style="width:{{ row.pct }}%; background:var(--teal)"></div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="empty-state">No expense data for this month.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

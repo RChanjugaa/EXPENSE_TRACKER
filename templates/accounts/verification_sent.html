@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Verification Sent{% endblock %}
+{% block content %}
+<div class="row justify-content-center auth-wrap">
+    <div class="col-lg-6">
+        <div class="board-card p-4">
+            <div class="eyebrow text-dark mb-2">Check your email</div>
+            <h1 class="h3">Verification code sent</h1>
+            <p class="soft-text">We sent a 6-digit verification code to <strong>{{ email }}</strong>. Enter it to activate your account.</p>
+            {% if email_setup_warning %}
+                <div class="alert alert-warning">{{ email_setup_warning }}</div>
+            {% endif %}
+            {% if dev_code %}
+                <div class="alert alert-info">Development code: <strong>{{ dev_code }}</strong></div>
+            {% endif %}
+            <a class="btn btn-primary" href="{% url 'verify_registration_otp' %}">Enter Verification Code</a>
+            <a class="btn btn-outline-secondary" href="{% url 'resend_verification' %}">Send Another Code</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

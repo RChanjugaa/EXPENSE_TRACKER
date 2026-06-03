@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load expense_filters %}
+{% block title %}Verify Payment — Expense Tracker{% endblock %}
+{% block content %}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'payment_history' %}">Payments</a></li>
+        <li class="breadcrumb-item active">Verify Payment</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="board-card p-5">
+            <div class="text-center mb-4">
+                <div class="feature-icon mx-auto mb-3" style="background:var(--sage)">
+                    <i class="bi bi-shield-check" style="color:#3d6b2e;font-size:1.4rem"></i>
+                </div>
+                <h1 class="h4 fw-bold">Verify Payment</h1>
+                <p class="soft-text mb-0">
+                    <strong>{{ payment.payer.username }}</strong> claims to have paid
+                    <strong>{{ payment.amount|currency }}</strong> for
+                    <strong>{{ payment.expense.title }}</strong>.
+                </p>
+            </div>
+
+            {% if payment.proof_file %}
+                <div class="text-center mb-4">
+                    <a class="btn btn-outline-primary" href="{{ payment.proof_file.url }}" target="_blank" rel="noopener">
+                        <i class="bi bi-file-earmark-check me-2"></i>View Payment Proof
+                    </a>
+                </div>
+            {% else %}
+                <div class="alert alert-warning text-center mb-4">
+                    <i class="bi bi-exclamation-triangle me-2"></i>No proof file was uploaded.
+                </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="approve">
+                        <button class="btn btn-success w-100" type="submit">
+                            <i class="bi bi-check-circle me-2"></i>Approve Payment
+                        </button>
+                    </form>
+                </div>
+                <div class="col-sm-6">
+                    <button class="btn btn-outline-danger w-100" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#reject-form">
+                        <i class="bi bi-x-circle me-2"></i>Reject Payment
+                    </button>
+                </div>
+            </div>
+
+            <div class="collapse mt-3" id="reject-form">
+                <div class="board-card p-3">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reject">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Reason for rejection</label>
+                            {{ reject_form.rejection_reason }}
+                            {% for e in reject_form.rejection_reason.errors %}
+                                <div class="form-text text-danger">{{ e }}</div>
+                            {% endfor %}
+                        </div>
+                        <button class="btn btn-danger w-100" type="submit">
+                            <i class="bi bi-x-circle me-2"></i>Confirm Rejection
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a class="soft-text small" href="{% url 'payment_history' %}">
+                    <i class="bi bi-arrow-left me-1"></i>Back to payment history
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

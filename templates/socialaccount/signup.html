@@ -1,0 +1,19 @@
+﻿{% extends "base.html" %}
+{% block title %}Confirm Gmail{% endblock %}
+{% block content %}
+<div class="row justify-content-center auth-wrap">
+    <div class="col-lg-7">
+        <div class="auth-card p-4">
+            <div class="eyebrow text-dark mb-2">Google sign in</div>
+            <h1 class="h4">Confirm your Gmail account</h1>
+            <p class="soft-text">This Gmail address will be used for group invitations, expense shares, and payment reminders.</p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary" type="submit">Continue</button>
+                <a class="btn btn-outline-secondary" href="{% url 'login' %}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
