@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: expense-tracker
+    runtime: python
+    buildCommand: ./build.sh
+    startCommand: gunicorn expense_tracker.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.13
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: WEB_CONCURRENCY
+        value: "4"
