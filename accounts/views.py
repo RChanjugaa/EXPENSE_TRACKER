@@ -11,7 +11,7 @@ from groups.models import ExpenseGroup
 from payments.models import Payment
 
 from .emailing import email_delivery_context, is_console_email_backend, send_expense_tracker_mail
-from .forms import RegistrationForm, RequestOTPForm, ResendVerificationForm, VerifyOTPForm
+from .forms import ForgotPasswordForm, RegistrationForm, RequestOTPForm, ResendVerificationForm, ResetPasswordForm, VerifyOTPForm
 from .models import EmailLoginOTP, EmailVerification
 
 
@@ -167,6 +167,68 @@ def verify_login_otp(request):
     context = {'form': form, 'email': user.email, **email_delivery_context()}
     context['dev_code'] = request.session.get('dev_login_code', '')
     return render(request, 'accounts/verify_login_otp.html', context)
+
+
+def forgot_password(request):
+    form = ForgotPasswordForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        email = form.cleaned_data['email'].lower()
+        user = get_user_model().objects.filter(email__iexact=email).first()
+        if user:
+            code = get_random_string(6, allowed_chars='0123456789')
+            try:
+                send_expense_tracker_mail(
+                    subject='Your Expense Tracker password reset code',
+                    message=(
+                        f'Hi {user.username},\n\n'
+                        f'Your password reset code is: {code}\n\n'
+                        'This code expires in 10 minutes. If you did not request a reset, ignore this email.'
+                    ),
+                    recipient_list=[user.email],
+                )
+            except Exception as exc:
+                form.add_error(None, f'We could not send the reset code. Check email settings and try again. ({exc})')
+            else:
+                # Re-use EmailLoginOTP table to store reset code
+                EmailLoginOTP.objects.create(user=user, code=code)
+                request.session['reset_user_id'] = user.pk
+                if is_console_email_backend():
+                    request.session['dev_reset_code'] = code
+                messages.success(request, f'We sent a 6-digit reset code to {user.email}.')
+                return redirect('reset_password')
+        else:
+            form.add_error('email', 'No account was found for this email.')
+    return render(request, 'accounts/forgot_password.html', {'form': form, **email_delivery_context()})
+
+
+def reset_password(request):
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        messages.error(request, 'Request a password reset code first.')
+        return redirect('forgot_password')
+    user = get_object_or_404(get_user_model(), pk=user_id)
+    form = ResetPasswordForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        otp = EmailLoginOTP.objects.filter(user=user, code=form.cleaned_data['code']).first()
+        if otp and otp.is_valid:
+            otp.used_at = timezone.now()
+            otp.save(update_fields=['used_at'])
+            user.set_password(form.cleaned_data['new_password'])
+            user.is_active = True  # Activate in case account was inactive
+            user.save()
+            # Ensure email is marked as verified
+            ev, _ = EmailVerification.objects.get_or_create(user=user)
+            if ev.verified_at is None:
+                ev.verified_at = timezone.now()
+                ev.save(update_fields=['verified_at'])
+            request.session.pop('reset_user_id', None)
+            request.session.pop('dev_reset_code', None)
+            messages.success(request, 'Your password has been reset. You can now sign in with your new password.')
+            return redirect('login')
+        form.add_error('code', 'Invalid or expired reset code.')
+    context = {'form': form, 'email': user.email, **email_delivery_context()}
+    context['dev_code'] = request.session.get('dev_reset_code', '')
+    return render(request, 'accounts/reset_password.html', context)
 
 
 @login_required

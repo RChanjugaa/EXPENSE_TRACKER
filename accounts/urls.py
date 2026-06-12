@@ -13,6 +13,8 @@ urlpatterns = [
     path('resend-verification/', views.resend_verification, name='resend_verification'),
     path('login/otp/', views.request_login_otp, name='request_login_otp'),
     path('login/otp/verify/', views.verify_login_otp, name='verify_login_otp'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('reset-password/', views.reset_password, name='reset_password'),
     path('login/', auth_views.LoginView.as_view(
         template_name='accounts/login.html',
         authentication_form=EmailOrUsernameAuthenticationForm,

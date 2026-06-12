@@ -67,6 +67,43 @@ class RequestOTPForm(forms.Form):
         return validate_gmail_address(self.cleaned_data['email'])
 
 
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField(
+        label='Gmail address',
+        widget=forms.EmailInput(attrs={'placeholder': 'name@gmail.com', 'autocomplete': 'email'}),
+    )
+
+    def clean_email(self):
+        return validate_gmail_address(self.cleaned_data['email'])
+
+
+class ResetPasswordForm(forms.Form):
+    code = forms.CharField(
+        label='6-digit reset code',
+        min_length=6,
+        max_length=6,
+        widget=forms.TextInput(attrs={'inputmode': 'numeric', 'autocomplete': 'one-time-code'}),
+    )
+    new_password = forms.CharField(
+        label='New password',
+        min_length=8,
+        help_text='Password must be at least 8 characters long.',
+        widget=forms.PasswordInput(attrs={'placeholder': 'Enter your new password', 'autocomplete': 'new-password'}),
+    )
+    confirm_password = forms.CharField(
+        label='Confirm new password',
+        widget=forms.PasswordInput(attrs={'placeholder': 'Re-enter the new password', 'autocomplete': 'new-password'}),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        new = cleaned.get('new_password')
+        confirm = cleaned.get('confirm_password')
+        if new and confirm and new != confirm:
+            raise forms.ValidationError("Passwords don't match.")
+        return cleaned
+
+
 class VerifyOTPForm(forms.Form):
     code = forms.CharField(
         label='One-time password',

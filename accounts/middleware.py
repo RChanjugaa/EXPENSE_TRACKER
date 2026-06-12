@@ -14,6 +14,8 @@ class RequireLoginMiddleware:
         'resend_verification',
         'request_login_otp',
         'verify_login_otp',
+        'forgot_password',
+        'reset_password',
         'google_login',
         'google_callback',
         'account_login',
